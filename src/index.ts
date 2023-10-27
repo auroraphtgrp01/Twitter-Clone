@@ -5,8 +5,8 @@ const app = express()
 const port = 3000
 
 app.use(express.json())
-app.use('/user', userRoutes)
 databaseService.connect()
+app.use('/user', userRoutes)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
