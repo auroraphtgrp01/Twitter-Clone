@@ -1,9 +1,24 @@
 import { Router } from 'express'
 import { loginController, registerController } from '~/controllers/users.controllers'
-import { loginValidator } from '~/middlewares/users.middlewares'
+import { loginValidator, registerValidator } from '~/middlewares/users.middlewares'
+import { validate } from '~/utils/validation'
 const usersRoutes = Router()
 
 usersRoutes.post('/login', loginValidator, loginController)
-usersRoutes.post('/register', registerController)
+
+/**
+ * Description. Register a new user.
+ * Path: /register
+ * Method: POST
+ * Body: {
+ * name: string,
+ * email: string,
+ * password: string,
+ * confirm_password: string,
+ * date_of_birth: ISO8601
+ * }
+ */
+
+usersRoutes.post('/register', registerValidator, registerController)
 
 export default usersRoutes
