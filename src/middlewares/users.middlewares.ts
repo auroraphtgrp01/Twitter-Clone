@@ -1,13 +1,15 @@
 import { Request, Response, NextFunction } from 'express'
 import { checkSchema } from 'express-validator'
+import { ErrorWithStatus } from '~/models/Errors'
 import usersService from '~/services/users.services'
 import { validate } from '~/utils/validation'
 export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body
   if (email === 'leminhtuan@gmail.com' && password == '123334') {
-    return res.json({ message: 'Login Success' })
+    // return res.json({ message: 'Login Success' })
+    next()
   }
-  return res.status(400).json({ message: 'Login Failed' })
+  // return res.status(400).json({ message: 'Login Failed' })
 }
 
 export const registerValidator = validate(
@@ -31,7 +33,7 @@ export const registerValidator = validate(
         options: async (value) => {
           const isExitsEmail = await usersService.checkEmailExits(value)
           if (isExitsEmail) {
-            throw new Error('Email already exists')
+            throw new ErrorWithStatus({ message: 'Email already exists', status: 400 })
           }
           return true
         }

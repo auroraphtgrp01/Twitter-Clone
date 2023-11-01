@@ -1,5 +1,5 @@
 import { MongoClient, Db, Collection } from 'mongodb'
-import User from '~/models/User.schemas'
+import User from '~/models/schemas/User.schemas'
 import { config } from 'dotenv'
 
 config()
@@ -17,7 +17,7 @@ class DatabaseService {
       await this.db.command({ ping: 1 })
       console.log('Pinged your deployment. You successfully connected to MongoDB!')
     } catch (error) {
-      console.log('Error' + error)
+      console.log('Errora' + error)
       throw error
     }
   }
