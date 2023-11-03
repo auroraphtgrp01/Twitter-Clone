@@ -15,7 +15,7 @@ export const loginValidator = validate(
     email: {
       trim: true,
       isEmail: {
-        errorMessage: USER_MESSAGES.EMIAL_IS_INVALID
+        errorMessage: USER_MESSAGES.EMAIL_IS_INVALID
       },
       custom: {
         options: async (value, { req }) => {
@@ -77,7 +77,7 @@ export const registerValidator = validate(
       },
       trim: true,
       isEmail: {
-        errorMessage: USER_MESSAGES.EMIAL_IS_INVALID
+        errorMessage: USER_MESSAGES.EMAIL_IS_INVALID
       },
       custom: {
         options: async (value) => {
@@ -172,7 +172,7 @@ export const accessTokenValidator = validate(
               })
             }
             try {
-              const decoded_authorization = await verifyToken({ token: access_token });
+              const decoded_authorization = await verifyToken({ token: access_token, secretOnPublicKey: process.env.JWT_ACCESS_TOKEN_SECRET });
               req.decoded_authorization = decoded_authorization
             } catch (error) {
               if (error instanceof JsonWebTokenError) {
@@ -187,6 +187,8 @@ export const accessTokenValidator = validate(
         }
       }
     }, ['headers']))
+
+
 export const refreshTokenValidator = validate(
   checkSchema({
     refresh_token: {
@@ -200,7 +202,7 @@ export const refreshTokenValidator = validate(
         options: async (value, { req }) => {
           try {
             const [decoded_refresh_token, refresh_token] = await Promise.all([
-              verifyToken({ token: value }),
+              verifyToken({ token: value, secretOnPublicKey: process.env.JWT_REFRESH_TOKEN_SECRET }),
               databaseService.refreshTokens.findOne({ token: value })
             ])
             if (refresh_token === null) {
@@ -213,6 +215,21 @@ export const refreshTokenValidator = validate(
             }
             throw error
           }
+        }
+      }
+    }
+  }, ['body']))
+
+export const emailVerifyToken = validate(
+  checkSchema({
+    email_verify_token: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.EMAIL_VERIFY_TOKEN_IS_REQUIRED
+      },
+      custom: {
+        options: async (value, { req }) => {
+          const decoded_email_verify_token = await verifyToken({ token: value, secretOnPublicKey: process.env.JWT_EMAIL_VERIFY_TOKEN_SECRET })
+          req.decoded_email_verify_token = decoded_email_verify_token
         }
       }
     }

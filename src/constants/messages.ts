@@ -6,7 +6,7 @@ export const USER_MESSAGES = {
   NAME_MUST_BE_A_STRING: 'Name must be a string',
   NAME_LENGTH_MUST_BE_FROM_1_TO_100: 'Name length must be from 1 to 100',
   EMAIL_IS_REQUIRED: 'Email is required',
-  EMIAL_IS_INVALID: 'Email is invalid',
+  EMAIL_IS_INVALID: 'Email is invalid',
   EMAIL_ALREADY_EXISTS: 'Email already exists',
   PASSWORD_IS_REQUIRED: 'Password is required',
   PASSWORD_MUST_BE_A_STRING: 'Password must be a string',
@@ -29,4 +29,17 @@ export const USER_MESSAGES = {
   LOGOUT_SUCCESS: 'Logout success',
   REFRESH_TOKEN_NOT_EXITS: 'Refresh token not exits',
   ACCESS_TOKEN_IS_IN_INVAILD: 'Access token is invalid',
+  EMAIL_VERIFY_SUCCESS: 'Email verify success',
+  EMAIL_VERIFY_FAIL: 'Email verify fail',
+  EMAIL_VERIFY_TOKEN_IS_REQUIRED: 'Email verify token is required',
+  EMAIL_VERIFY_TOKEN_IS_INVALID: 'Email verify token is invalid',
+  EMAIL_VERIFY_TOKEN_IS_EXPIRED: 'Email verify token is expired',
+  EMAIL_VERIFY_TOKEN_IS_NOT_FOUND: 'Email verify token is not found',
+  EMAIL_VERIFY_TOKEN_IS_NOT_MATCH: 'Email verify token is not match',
+  EMAIL_VERIFY_TOKEN_IS_NOT_MATCH_WITH_EMAIL: 'Email verify token is not match with email',
+  EMAIL_VERIFY_TOKEN_IS_NOT_MATCH_WITH_USER: 'Email verify token is not match with user',
+  EMAIL_VERIFY_TOKEN_IS_NOT_MATCH_WITH_USER_EMAIL: 'Email verify token is not match with user email',
+  EMAIL_VERIFY_TOKEN_IS_NOT_MATCH_WITH_USER_EMAIL_VERIFY_TOKEN:
+    'Email verify token is not match with user email verify token',
+  EMAIL_ALREADY_VERIFIED: 'Email already verified'
 } as const

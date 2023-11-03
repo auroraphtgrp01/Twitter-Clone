@@ -1,6 +1,18 @@
 import { Router } from 'express'
-import { loginController, logoutController, registerController } from '~/controllers/users.controllers'
-import { accessTokenValidator, loginValidator, refreshTokenValidator, registerValidator } from '~/middlewares/users.middlewares'
+import {
+  emailVerifyValidator,
+  loginController,
+  logoutController,
+  registerController,
+  deleteDBController
+} from '~/controllers/users.controllers'
+import {
+  accessTokenValidator,
+  loginValidator,
+  refreshTokenValidator,
+  registerValidator,
+  emailVerifyToken
+} from '~/middlewares/users.middlewares'
 import { wrapAsync } from '~/utils/handlers'
 const usersRoutes = Router()
 
@@ -32,4 +44,13 @@ usersRoutes.post('/register', registerValidator, wrapAsync(registerController))
  * Body: {Refresh Token: string}
  */
 usersRoutes.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
+/**
+ * Description. Verify Email
+ * Path: /verify-email
+ * Method: POST
+ * Body: {email-verification-token: string}
+ */
+usersRoutes.post('/verify-email', emailVerifyToken, wrapAsync(emailVerifyValidator))
+usersRoutes.get('/delete-db', deleteDBController)
+
 export default usersRoutes
