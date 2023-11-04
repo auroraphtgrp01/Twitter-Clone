@@ -7,7 +7,8 @@ import {
   deleteDBController,
   resendVerifyEmailController,
   forgotPasswordController,
-  verifyForgotPasswordToken
+  verifyForgotPasswordToken,
+  resetPasswordController
 } from '~/controllers/users.controllers'
 import {
   accessTokenValidator,
@@ -16,7 +17,8 @@ import {
   registerValidator,
   emailVerifyToken,
   forgotPasswordValidator,
-  verifyForgotPasswordTokenValidator
+  verifyForgotPasswordTokenValidator,
+  resetPasswordValidator
 } from '~/middlewares/users.middlewares'
 import { wrapRequestHandler } from '~/utils/handlers'
 const usersRoutes = Router()
@@ -83,6 +85,13 @@ usersRoutes.post(
   verifyForgotPasswordTokenValidator,
   wrapRequestHandler(verifyForgotPasswordToken)
 )
+/**
+ * Description. Reset Password
+ * Path: /reset-password
+ * Method: POST
+ * Body: {email: string}
+ */
+usersRoutes.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController))
 
 usersRoutes.get('/delete-db', deleteDBController)
 

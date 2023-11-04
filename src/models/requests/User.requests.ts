@@ -26,6 +26,12 @@ export interface ForgotPasswordRequestBody {
   email: string
   _id: string
 }
+
+export interface ResetPasswordRequestBody {
+  password: string
+  email: string
+  forgot_password_token: string
+}
 export interface TokenPayload extends JwtPayload {
   user_id: string
   token_type: TokenType
