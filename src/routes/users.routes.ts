@@ -1,19 +1,22 @@
 import { Router } from 'express'
 import {
-  emailVerifyValidator,
+  verifyEmailController,
   loginController,
   logoutController,
   registerController,
-  deleteDBController
+  deleteDBController,
+  resendVerifyEmailController,
+  forgotPasswordController
 } from '~/controllers/users.controllers'
 import {
   accessTokenValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator,
-  emailVerifyToken
+  emailVerifyToken,
+  forgotPasswordValidator
 } from '~/middlewares/users.middlewares'
-import { wrapAsync } from '~/utils/handlers'
+import { wrapRequestHandler } from '~/utils/handlers'
 const usersRoutes = Router()
 
 /**
@@ -22,7 +25,7 @@ const usersRoutes = Router()
  * Method: POST
  * Body: {  email: string,  password: string}
  */
-usersRoutes.post('/login', loginValidator, wrapAsync(loginController))
+usersRoutes.post('/login', loginValidator, wrapRequestHandler(loginController))
 /**
  * Description. Register a new user
  * Path: /register
@@ -35,7 +38,7 @@ usersRoutes.post('/login', loginValidator, wrapAsync(loginController))
  * date_of_birth: ISO8601
  * }
  */
-usersRoutes.post('/register', registerValidator, wrapAsync(registerController))
+usersRoutes.post('/register', registerValidator, wrapRequestHandler(registerController))
 /**
  * Description. Logout a new user
  * Path: /logout
@@ -43,14 +46,30 @@ usersRoutes.post('/register', registerValidator, wrapAsync(registerController))
  * Header: {Authorization: Bearer <access_token>}
  * Body: {Refresh Token: string}
  */
-usersRoutes.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
+usersRoutes.post('/logout', accessTokenValidator, refreshTokenValidator, wrapRequestHandler(logoutController))
 /**
  * Description. Verify Email
  * Path: /verify-email
  * Method: POST
  * Body: {email-verification-token: string}
  */
-usersRoutes.post('/verify-email', emailVerifyToken, wrapAsync(emailVerifyValidator))
+usersRoutes.post('/verify-email', emailVerifyToken, wrapRequestHandler(verifyEmailController))
+/**
+ * Description. Verify Email
+ * Path: /resend-verify-email
+ * Method: POST
+ * Header {Authorization: Bearer <access_token>}
+ * Body: {}
+ */
+usersRoutes.post('/resend-verify-email', accessTokenValidator, wrapRequestHandler(resendVerifyEmailController))
+/**
+ * Description. Forgot Password
+ * Path: /forgot-password
+ * Method: POST
+ * Header {}
+ * Body: {email: string}
+ */
+usersRoutes.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController))
 usersRoutes.get('/delete-db', deleteDBController)
 
 export default usersRoutes

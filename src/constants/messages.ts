@@ -41,5 +41,7 @@ export const USER_MESSAGES = {
   EMAIL_VERIFY_TOKEN_IS_NOT_MATCH_WITH_USER_EMAIL: 'Email verify token is not match with user email',
   EMAIL_VERIFY_TOKEN_IS_NOT_MATCH_WITH_USER_EMAIL_VERIFY_TOKEN:
     'Email verify token is not match with user email verify token',
-  EMAIL_ALREADY_VERIFIED: 'Email already verified'
+  EMAIL_ALREADY_VERIFIED: 'Email already verified',
+  RESEND_VERIFY_EMAIL_SUCCESS: 'Resend verify email success',
+  CHECK_EMAIL_TO_RESET_PASSWORD: 'Check email to reset password',
 } as const
