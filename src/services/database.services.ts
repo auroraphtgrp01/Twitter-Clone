@@ -2,6 +2,7 @@ import { MongoClient, Db, Collection } from 'mongodb'
 import User from '~/models/schemas/User.schemas'
 import { config } from 'dotenv'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
+import Followers from '~/models/schemas/Follower.schemas'
 
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitterdb.1rqwsij.mongodb.net/?retryWrites=true&w=majority`
@@ -27,6 +28,9 @@ class DatabaseService {
   }
   get refreshTokens(): Collection<RefreshToken> {
     return this.db.collection(process.env.DB_REFRESH_TOKEN_COLLECTION as string)
+  }
+  get followers(): Collection<Followers> {
+    return this.db.collection(process.env.DB_FOLLOWERS_COLLECTION as string)
   }
 }
 

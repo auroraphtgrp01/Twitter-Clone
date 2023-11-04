@@ -10,7 +10,8 @@ import {
   verifyForgotPasswordToken,
   resetPasswordController,
   getMe,
-  updateMeController
+  updateMeController,
+  followController
 } from '~/controllers/users.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
@@ -23,7 +24,8 @@ import {
   verifyForgotPasswordTokenValidator,
   resetPasswordValidator,
   verifiedUserValidator,
-  updateMeValidator
+  updateMeValidator,
+  followValidator
 } from '~/middlewares/users.middlewares'
 import { UpdateMeRequestBody } from '~/models/requests/User.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
@@ -99,17 +101,26 @@ usersRoutes.post(
  */
 usersRoutes.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController))
 /**
- * Description. Reset Password
- * Path: /reset-password
- * Method: POST
- * Body: {email: string}
+ * Description. Get My Profile
+ * Path: /me
+ * Header {Authorization: Bearer <access_token>}
+ * Method: GET
  */
 usersRoutes.get('/me', accessTokenValidator, wrapRequestHandler(getMe))
 /**
- * Description. Reset Password
- * Path: /reset-password
- * Method: POST
- * Body: {email: string}
+ * Description. Update My Profile
+ * Path: /me
+ * Method: PATCH
+ * Header {Authorization: Bearer <access_token>}
+ * Body: {
+ *  'name',
+    'date_of_birth',
+    'bio',
+    'location',
+    'website',
+    'username',
+    'avatar',
+    'cover_photo'}
  */
 usersRoutes.patch(
   '/me',
@@ -127,6 +138,20 @@ usersRoutes.patch(
     'cover_photo'
   ]),
   wrapRequestHandler(updateMeController)
+)
+/**
+ * Description. Follow Someone
+ * Path: /follow
+ * Method: POST
+ * Header {Authorization: Bearer <access_token>}
+ * Body: {followed_user_id: string}
+ */
+usersRoutes.post(
+  '/follow',
+  accessTokenValidator,
+  verifiedUserValidator,
+  followValidator,
+  wrapRequestHandler(followController)
 )
 
 usersRoutes.get('/delete-db', deleteDBController)

@@ -7,6 +7,7 @@ import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import { ObjectId, ReturnDocument } from 'mongodb'
 import { RegisterRequestBody, UpdateMeRequestBody } from '~/models/requests/User.requests'
 import { USER_MESSAGES } from '~/constants/messages'
+import Followers from '~/models/schemas/Follower.schemas'
 
 class UsersService {
   private signAccessToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
@@ -238,6 +239,28 @@ class UsersService {
       }
     )
     return user
+  }
+  async follow(user_id: string, followed_user_id: string) {
+    const follower = await databaseService.followers.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    if (follower === null) {
+      const user = await databaseService.followers.insertOne(
+        new Followers({
+          user_id: new ObjectId(user_id),
+          followed_user_id: new ObjectId(followed_user_id)
+        })
+      )
+      return {
+        user
+      }
+    }
+    return {
+      message: USER_MESSAGES.FOLLOWED_BEFORE
+    }
+
+
   }
 }
 

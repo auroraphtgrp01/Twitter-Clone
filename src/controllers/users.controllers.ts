@@ -9,7 +9,8 @@ import {
   VerifyEmailRequestBody,
   ForgotPasswordRequestBody,
   ResetPasswordRequestBody,
-  UpdateMeRequestBody
+  UpdateMeRequestBody,
+  FollowRequestBody
 } from '~/models/requests/User.requests'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schemas'
@@ -152,3 +153,23 @@ export const updateMeController = async (
   })
 }
 
+export const followController = async (
+  req: Request<ParamsDictionary, any, FollowRequestBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { followed_user_id } = req.body
+  if (user_id === followed_user_id) {
+    throw new ErrorWithStatus(
+      {
+        message: USER_MESSAGES.CANNOT_FOLLOW_YOURSELF,
+        status: 404
+      })
+  }
+  const result = await usersService.follow(user_id, followed_user_id)
+  return res.json({
+    message: USER_MESSAGES.FOLLOW_SUCCESS,
+    result
+  })
+}
