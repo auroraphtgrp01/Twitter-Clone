@@ -6,7 +6,8 @@ import {
   registerController,
   deleteDBController,
   resendVerifyEmailController,
-  forgotPasswordController
+  forgotPasswordController,
+  verifyForgotPasswordToken
 } from '~/controllers/users.controllers'
 import {
   accessTokenValidator,
@@ -14,7 +15,8 @@ import {
   refreshTokenValidator,
   registerValidator,
   emailVerifyToken,
-  forgotPasswordValidator
+  forgotPasswordValidator,
+  verifyForgotPasswordTokenValidator
 } from '~/middlewares/users.middlewares'
 import { wrapRequestHandler } from '~/utils/handlers'
 const usersRoutes = Router()
@@ -70,6 +72,18 @@ usersRoutes.post('/resend-verify-email', accessTokenValidator, wrapRequestHandle
  * Body: {email: string}
  */
 usersRoutes.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController))
+/**
+ * Description. Verify link forgot password
+ * Path: /verify-forgot-password
+ * Method: POST
+ * Body: {email: string}
+ */
+usersRoutes.post(
+  '/verify-forgot-password',
+  verifyForgotPasswordTokenValidator,
+  wrapRequestHandler(verifyForgotPasswordToken)
+)
+
 usersRoutes.get('/delete-db', deleteDBController)
 
 export default usersRoutes

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { checkSchema } from 'express-validator'
 import { JsonWebTokenError } from 'jsonwebtoken'
+import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
@@ -251,6 +252,50 @@ export const forgotPasswordValidator = validate(checkSchema({
         }
         req.user = user
         return true
+      }
+    }
+  }
+}, ['body']))
+
+export const verifyForgotPasswordTokenValidator = validate(checkSchema({
+  forgot_password_token: {
+    trim: true,
+    notEmpty: {
+      errorMessage: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED
+    },
+    custom: {
+      options: async (value, { req }) => {
+        try {
+          const decoded_forgot_password_token = await verifyToken({
+            token: value,
+            secretOnPublicKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
+          })
+          const { user_id } = decoded_forgot_password_token
+          const user = await databaseService.users.findOne({
+            _id: new ObjectId(user_id)
+          })
+          if (!user) {
+            throw new ErrorWithStatus({
+              message: USER_MESSAGES.USER_NOT_FOUND,
+              status: HTTP_STATUS.UNAUTHORIZED
+            })
+          }
+          if (user.forgot_password_token !== value) {
+            throw new ErrorWithStatus({
+              message: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_INVALID,
+              status: HTTP_STATUS.UNAUTHORIZED
+            })
+          }
+          // req.decode_forgot_password_token = decode
+        } catch (error) {
+          if (error instanceof JsonWebTokenError) {
+            throw new ErrorWithStatus({
+              message: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_INVALID
+              , status: HTTP_STATUS.UNAUTHORIZED
+            })
+          }
+          throw error
+        }
       }
     }
   }
