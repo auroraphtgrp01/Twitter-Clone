@@ -8,7 +8,8 @@ import {
   TokenPayload,
   VerifyEmailRequestBody,
   ForgotPasswordRequestBody,
-  ResetPasswordRequestBody
+  ResetPasswordRequestBody,
+  UpdateMeRequestBody
 } from '~/models/requests/User.requests'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schemas'
@@ -17,11 +18,12 @@ import databaseService from '~/services/database.services'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { UserVerifyStatus } from '~/constants/enums'
+import { pick } from 'lodash'
 
 export const loginController = async (req: Request<ParamsDictionary, any, LoginRequestBody>, res: Response) => {
   const user = req.user as User
   const user_id = user._id as ObjectId
-  const result = await usersService.login(user_id.toString())
+  const result = await usersService.login({ user_id: user_id.toString(), verify: user.verify })
   return res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
@@ -106,7 +108,10 @@ export const forgotPasswordController = async (
   next: NextFunction
 ) => {
   const { _id } = req.user as User
-  const result = await usersService.forgotPassword((_id as ObjectId).toString())
+  const result = await usersService.forgotPassword({
+    user_id: (_id as ObjectId).toString(),
+    verify: (req.user as User).verify as UserVerifyStatus
+  })
   return res.json(result)
 }
 
@@ -132,3 +137,18 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
   const result = await usersService.getMe(user_id)
   return res.json(result)
 }
+
+export const updateMeController = async (
+  req: Request<ParamsDictionary, any, UpdateMeRequestBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { body } = req
+  const user = await usersService.updateMe(user_id, body)
+  return res.json({
+    message: USER_MESSAGES.UPDATE_ME_SUCCESS,
+    user
+  })
+}
+

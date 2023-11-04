@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
+import { NextFunction, Request, Response } from 'express'
 import { ParamSchema, check, checkSchema } from 'express-validator'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
+import { UserVerifyStatus } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
@@ -107,6 +109,45 @@ const forgotPasswordTokenSchema: ParamSchema = {
     }
   }
 }
+const imageUrlSchema: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USER_MESSAGES.IMAGE_URL_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    options: {
+      min: 1,
+      max: 400
+    },
+    errorMessage: USER_MESSAGES.IMAGE_URL_MUST_BE_FROM_1_TO_400
+  }
+}
+const nameSchema: ParamSchema = {
+  isString: {
+    errorMessage: USER_MESSAGES.NAME_MUST_BE_A_STRING
+  },
+  notEmpty: {
+    errorMessage: USER_MESSAGES.NAME_IS_REQUIRED
+  },
+  trim: true,
+  isLength: {
+    options: {
+      min: 1,
+      max: 400
+    },
+    errorMessage: USER_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_100
+  }
+}
+const dateOfBirthSchema: ParamSchema = {
+  isISO8601: {
+    options: {
+      strict: true,
+      strictSeparator: true
+    },
+    errorMessage: USER_MESSAGES.DATE_OF_BIRTH_IS_ISO8601
+  }
+}
 
 export const loginValidator = validate(
   checkSchema({
@@ -153,22 +194,7 @@ export const loginValidator = validate(
 
 export const registerValidator = validate(
   checkSchema({
-    name: {
-      isString: {
-        errorMessage: USER_MESSAGES.NAME_MUST_BE_A_STRING
-      },
-      notEmpty: {
-        errorMessage: USER_MESSAGES.NAME_IS_REQUIRED
-      },
-      trim: true,
-      isLength: {
-        options: {
-          min: 1,
-          max: 100
-        },
-        errorMessage: USER_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_100
-      }
-    },
+    name: nameSchema,
     email: {
       notEmpty: {
         errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
@@ -189,15 +215,7 @@ export const registerValidator = validate(
     },
     password: passwordSchema,
     confirm_password: confirmPasswordSchema,
-    date_of_birth: {
-      isISO8601: {
-        options: {
-          strict: true,
-          strictSeparator: true
-        },
-        errorMessage: USER_MESSAGES.DATE_OF_BIRTH_IS_ISO8601
-      }
-    }
+    date_of_birth: dateOfBirthSchema
   }, ['body'])
 )
 
@@ -311,3 +329,85 @@ export const resetPasswordValidator = validate(checkSchema({
   confirm_password: confirmPasswordSchema,
   forgot_password_token: forgotPasswordTokenSchema
 }, ['body']))
+
+export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
+  const { verify } = req.decoded_authorization as TokenPayload
+  if (verify !== UserVerifyStatus.Verified) {
+    return next(new ErrorWithStatus({
+      message: USER_MESSAGES.USER_NOT_VERIFIED,
+      status: HTTP_STATUS.FORBIDDEN
+    }))
+  }
+  next()
+}
+
+export const updateMeValidator = validate(checkSchema({
+  name: {
+    ...nameSchema,
+    optional: true,
+    notEmpty: undefined
+  },
+  date_of_birth: {
+    ...dateOfBirthSchema,
+    optional: true,
+    notEmpty: undefined
+  },
+  bio: {
+    optional: true,
+    isString: {
+      errorMessage: USER_MESSAGES.BIO_MUST_BE_A_STRING
+    },
+    trim: true,
+    isLength: {
+      options: {
+        min: 1,
+        max: 200
+      },
+      errorMessage: USER_MESSAGES.BIO_LENGTH_MUST_BE_FROM_1_TO_200
+    }
+  },
+  location: {
+    optional: true,
+    isString: {
+      errorMessage: USER_MESSAGES.LOCATION_MUST_BE_A_STRING
+    },
+    trim: true,
+    isLength: {
+      options: {
+        min: 1,
+        max: 200
+      },
+      errorMessage: USER_MESSAGES.LOCATION_LENGTH_MUST_BE_FROM_1_TO_200
+    }
+  },
+  website: {
+    optional: true,
+    isString: {
+      errorMessage: USER_MESSAGES.WEBSITE_MUST_BE_A_STRING
+    },
+    trim: true,
+    isLength: {
+      options: {
+        min: 1,
+        max: 100
+      },
+      errorMessage: USER_MESSAGES.WEBSITE_LENGTH_MUST_BE_FROM_1_TO_100
+    }
+  },
+  username: {
+    optional: true,
+    isString: {
+      errorMessage: USER_MESSAGES.USERNAME_MUST_BE_A_STRING
+    },
+    trim: true,
+    isLength: {
+      options: {
+        min: 1,
+        max: 50
+      },
+      errorMessage: USER_MESSAGES.USERNAME_LENGTH_MUST_BE_FROM_1_TO_50
+    }
+  },
+  avatar: imageUrlSchema,
+  cover_photo: imageUrlSchema
+}))

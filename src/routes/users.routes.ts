@@ -9,8 +9,10 @@ import {
   forgotPasswordController,
   verifyForgotPasswordToken,
   resetPasswordController,
-  getMe
+  getMe,
+  updateMeController
 } from '~/controllers/users.controllers'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   accessTokenValidator,
   loginValidator,
@@ -19,8 +21,11 @@ import {
   emailVerifyToken,
   forgotPasswordValidator,
   verifyForgotPasswordTokenValidator,
-  resetPasswordValidator
+  resetPasswordValidator,
+  verifiedUserValidator,
+  updateMeValidator
 } from '~/middlewares/users.middlewares'
+import { UpdateMeRequestBody } from '~/models/requests/User.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
 const usersRoutes = Router()
 
@@ -100,6 +105,30 @@ usersRoutes.post('/reset-password', resetPasswordValidator, wrapRequestHandler(r
  * Body: {email: string}
  */
 usersRoutes.get('/me', accessTokenValidator, wrapRequestHandler(getMe))
+/**
+ * Description. Reset Password
+ * Path: /reset-password
+ * Method: POST
+ * Body: {email: string}
+ */
+usersRoutes.patch(
+  '/me',
+  accessTokenValidator,
+  verifiedUserValidator,
+  updateMeValidator,
+  filterMiddleware<UpdateMeRequestBody>([
+    'name',
+    'date_of_birth',
+    'bio',
+    'location',
+    'website',
+    'username',
+    'avatar',
+    'cover_photo'
+  ]),
+  wrapRequestHandler(updateMeController)
+)
+
 usersRoutes.get('/delete-db', deleteDBController)
 
 export default usersRoutes
