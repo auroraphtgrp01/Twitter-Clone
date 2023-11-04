@@ -8,7 +8,8 @@ import {
   resendVerifyEmailController,
   forgotPasswordController,
   verifyForgotPasswordToken,
-  resetPasswordController
+  resetPasswordController,
+  getMe
 } from '~/controllers/users.controllers'
 import {
   accessTokenValidator,
@@ -92,7 +93,13 @@ usersRoutes.post(
  * Body: {email: string}
  */
 usersRoutes.post('/reset-password', resetPasswordValidator, wrapRequestHandler(resetPasswordController))
-
+/**
+ * Description. Reset Password
+ * Path: /reset-password
+ * Method: POST
+ * Body: {email: string}
+ */
+usersRoutes.get('/me', accessTokenValidator, wrapRequestHandler(getMe))
 usersRoutes.get('/delete-db', deleteDBController)
 
 export default usersRoutes
