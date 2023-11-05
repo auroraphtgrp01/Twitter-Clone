@@ -10,7 +10,9 @@ import {
   ForgotPasswordRequestBody,
   ResetPasswordRequestBody,
   UpdateMeRequestBody,
-  FollowRequestBody
+  FollowRequestBody,
+  UnfollowRequestParams,
+  changePasswordRequestBody
 } from '~/models/requests/User.requests'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schemas'
@@ -172,4 +174,26 @@ export const followController = async (
     message: USER_MESSAGES.FOLLOW_SUCCESS,
     result
   })
+}
+
+export const unfollowController = async (
+  req: Request<ParamsDictionary, any, UnfollowRequestParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { user_id: followed_user_id } = req.params
+  const result = await usersService.unfollow(user_id, followed_user_id)
+  res.json(result)
+}
+
+export const changePasswordController = async (
+  req: Request<ParamsDictionary, any, changePasswordRequestBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { password } = req.body
+  const result = await usersService.changePassword(user_id, password)
+  res.json(result)
 }

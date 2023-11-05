@@ -65,4 +65,11 @@ export const USER_MESSAGES = {
   INVALID_USER_ID: 'Invalid user id',
   FOLLOWED_BEFORE: 'Followed before',
   CANNOT_FOLLOW_YOURSELF: 'Cannot follow yourself',
+  ALREADY_UNFOLLOWED: 'Already unfollowed',
+  UNFOLLOW_SUCCESS: 'Unfollow success',
+  USERNAME_IS_INVALID:
+    'Username is invalid - Username must be 4-15 characters long and can only contain letters, numbers, underscores, not only numbers',
+  USERNAME_ALREADY_EXISTS: 'Username already exists',
+  OLD_PASSWORD_IS_INCORRECT: 'Old password is incorrect',
+  CHANGE_PASSWORD_SUCCESS: 'Change password success',
 } as const

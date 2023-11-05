@@ -8,6 +8,7 @@ import { ObjectId, ReturnDocument } from 'mongodb'
 import { RegisterRequestBody, UpdateMeRequestBody } from '~/models/requests/User.requests'
 import { USER_MESSAGES } from '~/constants/messages'
 import Followers from '~/models/schemas/Follower.schemas'
+import { ErrorWithStatus } from '~/models/Errors'
 
 class UsersService {
   private signAccessToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
@@ -261,6 +262,42 @@ class UsersService {
     }
 
 
+  }
+  async unfollow(userid: string, followed_user_id: string) {
+    const follower = await databaseService.followers.findOne({
+      user_id: new ObjectId(userid),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    if (follower === null) {
+      return {
+        message: USER_MESSAGES.ALREADY_UNFOLLOWED
+      }
+    }
+    const result = await databaseService.followers.deleteOne({
+      user_id: new ObjectId(userid),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    return {
+      message: USER_MESSAGES.UNFOLLOW_SUCCESS
+    }
+  }
+  async changePassword(user_id: string, password: string) {
+    const result = await databaseService.users.updateOne(
+      {
+        _id: new ObjectId(user_id)
+      },
+      {
+        $set: {
+          password: hashPassword(password)
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    return {
+      message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESS
+    }
   }
 }
 

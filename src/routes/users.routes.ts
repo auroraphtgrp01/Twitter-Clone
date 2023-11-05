@@ -11,7 +11,9 @@ import {
   resetPasswordController,
   getMe,
   updateMeController,
-  followController
+  followController,
+  unfollowController,
+  changePasswordController
 } from '~/controllers/users.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
@@ -25,7 +27,9 @@ import {
   resetPasswordValidator,
   verifiedUserValidator,
   updateMeValidator,
-  followValidator
+  followValidator,
+  unFollowValidator,
+  changePasswordValidator
 } from '~/middlewares/users.middlewares'
 import { UpdateMeRequestBody } from '~/models/requests/User.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
@@ -152,6 +156,34 @@ usersRoutes.post(
   verifiedUserValidator,
   followValidator,
   wrapRequestHandler(followController)
+)
+/**
+ * Description. Unfollow Someone
+ * Path: /follow/:user_id
+ * Method: DELETE
+ * Header {Authorization: Bearer <access_token>}
+ * Body: {user_id: string}
+ */
+usersRoutes.delete(
+  '/follow/:user_id',
+  accessTokenValidator,
+  verifiedUserValidator,
+  unFollowValidator,
+  wrapRequestHandler(unfollowController)
+)
+/**
+ * Description. Change Password
+ * Path: /change-password
+ * Method: PUT
+ * Header {Authorization: Bearer <access_token>}
+ * Body: {old_password: string, password: string, confirm_password: string}
+ */
+usersRoutes.put(
+  '/change-password',
+  accessTokenValidator,
+  verifiedUserValidator,
+  changePasswordValidator,
+  wrapRequestHandler(changePasswordController)
 )
 
 usersRoutes.get('/delete-db', deleteDBController)
