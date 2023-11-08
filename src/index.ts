@@ -2,13 +2,24 @@ import express from 'express'
 import userRoutes from './routes/users.routes'
 import databaseService from './services/database.services'
 import { defaultErrorHandler } from './middlewares/errors.middlewares'
+import mediasRoutes from './routes/medias.routes'
+import { initFolder } from './utils/file'
+import { config } from 'dotenv'
+import { UPLOAD_DIR } from './constants/dir'
+import staticRoutes from './routes/static.routes'
 
+config()
 const app = express()
-const port = 4000
+const port = process.env.PORT || 4000
+
+initFolder()
 
 databaseService.connect()
 app.use(express.json())
 app.use('/user', userRoutes)
+app.use('/medias', mediasRoutes)
+app.use('/static', staticRoutes)
+// app.use('/static', express.static(UPLOAD_DIR))
 app.use(defaultErrorHandler)
 
 app.listen(port, () => {

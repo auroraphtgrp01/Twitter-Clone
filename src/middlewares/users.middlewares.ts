@@ -152,7 +152,6 @@ const dateOfBirthSchema: ParamSchema = {
 const userIdSchema: ParamSchema = {
   custom: {
     options: async (value: string, { req }) => {
-      console.log('value', value);
       if (!ObjectId.isValid(value)) {
         throw new ErrorWithStatus({
           message: USER_MESSAGES.INVALID_USER_ID,
