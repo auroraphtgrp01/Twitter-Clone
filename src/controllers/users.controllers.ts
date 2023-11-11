@@ -12,7 +12,8 @@ import {
   UpdateMeRequestBody,
   FollowRequestBody,
   UnfollowRequestParams,
-  changePasswordRequestBody
+  changePasswordRequestBody,
+  RefreshTokenRequestBody
 } from '~/models/requests/User.requests'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schemas'
@@ -207,4 +208,18 @@ export const changePasswordController = async (
   const { password } = req.body
   const result = await usersService.changePassword(user_id, password)
   res.json(result)
+}
+
+export const refreshTokenController = async (
+  req: Request<ParamsDictionary, any, RefreshTokenRequestBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id, verify } = req.decoded_refresh_token as TokenPayload
+  const { refresh_token } = req.body
+  const result = await usersService.refreshToken({ user_id, verify, refresh_token })
+  return res.json({
+    message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
+    result
+  })
 }
