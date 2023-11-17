@@ -4,7 +4,6 @@ import path from 'path'
 import { Request, Response } from 'express'
 import { UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_DIR, UPLOAD_VIDEO_TEMP_DIR } from '~/constants/dir'
 import { get } from 'axios'
-
 export const initFolder = () => {
   ;[UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_TEMP_DIR].forEach((dir) => {
     if (!fs.existsSync(dir)) {
@@ -44,8 +43,13 @@ export const handleUploadImage = async (req: Request) => {
   })
 }
 export const handleUploadVideo = async (req: Request) => {
+  console.log('handleUploadVideo')
+  const nanoID = (await import('nanoid')).nanoid
+  const idName = nanoID()
+  const folderPath = path.resolve(UPLOAD_VIDEO_DIR, idName)
+  fs.mkdirSync(folderPath)
   const form = formidable({
-    uploadDir: UPLOAD_VIDEO_DIR,
+    uploadDir: folderPath,
     maxFiles: 1,
     maxFileSize: 400 * 1024 * 1024,
     filter: function ({ name, originalFilename, mimetype }) {
@@ -54,6 +58,9 @@ export const handleUploadVideo = async (req: Request) => {
         form.emit('error' as any, new Error('File is not valid') as any)
       }
       return valid
+    },
+    filename: function (filename) {
+      return idName
     }
   })
   return new Promise<File[]>((resolve, reject) => {

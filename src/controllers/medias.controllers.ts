@@ -6,6 +6,7 @@ import HTTP_STATUS from '~/constants/httpStatus'
 import mediaService from '~/services/medias.services'
 import fs from 'fs'
 import mime from 'mime'
+import { split } from 'lodash'
 
 export const uploadImageController = async (req: Request, res: Response, next: NextFunction) => {
   const result = await mediaService.uploadImage(req)
@@ -68,4 +69,20 @@ export const serveVideoStreamController = (req: Request, res: Response, next: Ne
   res.writeHead(HTTP_STATUS.PARTIAL_CONTENT, headers)
   const videoStream = fs.createReadStream(videoPath, { start, end })
   videoStream.pipe(res)
+}
+export const serveM3U8Controller = (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params
+  return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR + '/', id, 'master.m3u8'), (err) => {
+    if (err) {
+      return res.status(HTTP_STATUS.NOT_FOUND).send('Not Found !!!')
+    }
+  })
+}
+export const serveSegmentController = (req: Request, res: Response, next: NextFunction) => {
+  const { id, v, segment } = req.params
+  return res.sendFile(path.resolve(UPLOAD_VIDEO_DIR + '/', id, v, segment), (err) => {
+    if (err) {
+      return res.status(HTTP_STATUS.NOT_FOUND).send('Not Found !!!')
+    }
+  })
 }
