@@ -7,6 +7,7 @@ import mediaService from '~/services/medias.services'
 import fs from 'fs'
 import mime from 'mime'
 import { split } from 'lodash'
+import { USER_MESSAGES } from '~/constants/messages'
 
 export const uploadImageController = async (req: Request, res: Response, next: NextFunction) => {
   const result = await mediaService.uploadImage(req)
@@ -24,7 +25,6 @@ export const uploadVideoController = async (req: Request, res: Response, next: N
 }
 export const uploadVideoHLSController = async (req: Request, res: Response, next: NextFunction) => {
   const result = await mediaService.uploadVideoHLS(req)
-  console.log(result)
   return res.json({
     result: result
   })
@@ -84,5 +84,15 @@ export const serveSegmentController = (req: Request, res: Response, next: NextFu
     if (err) {
       return res.status(HTTP_STATUS.NOT_FOUND).send('Not Found !!!')
     }
+  })
+}
+
+export const videoStatusMediaController = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params
+  const result = await mediaService.getVideoStatus(id as string)
+  return res.json({
+    status:
+      result?.status == 0 ? 'Pending' : result?.status == 1 ? 'Processing' : result?.status == 2 ? 'Success' : 'Failed',
+    result: result !== null ? result : "Don't have this video"
   })
 }

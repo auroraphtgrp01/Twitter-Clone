@@ -57,7 +57,6 @@ const getResolution = async (filePath: string) => {
   ]}`
   const resolution = stdout.trim().split('x')
   const [width, height] = resolution
-  console.log('get resolution')
   return {
     width: Number(width),
     height: Number(height)
@@ -334,10 +333,7 @@ const encodeMax1080 = async ({
 // }
 
 export const encodeHLSWithMultipleVideoStreams = async (inputPath: string) => {
-  console.log('c1')
   const [bitrate, resolution] = await Promise.all([getBitrate(inputPath), getResolution(inputPath)])
-  console.log('done bitrate: ' + bitrate)
-
   const parent_folder = path.join(inputPath, '..')
   const outputSegmentPath = path.join(parent_folder, 'v%v/fileSequence%d.ts')
   const outputPath = path.join(parent_folder, 'v%v/prog_index.m3u8')

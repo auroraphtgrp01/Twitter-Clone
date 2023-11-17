@@ -20,7 +20,7 @@ export const handleUploadImage = async (req: Request) => {
     maxFiles: 4,
     keepExtensions: true,
     maxFileSize: 5000 * 1024,
-    maxTotalFileSize: (5000 * 1024) * 4,
+    maxTotalFileSize: 5000 * 1024 * 4,
     filter: function ({ name, originalFilename, mimetype }) {
       const valid = name === 'image' && Boolean(mimetype?.includes('image/'))
       if (!valid) {
@@ -43,7 +43,6 @@ export const handleUploadImage = async (req: Request) => {
   })
 }
 export const handleUploadVideo = async (req: Request) => {
-  console.log('handleUploadVideo')
   const nanoID = (await import('nanoid')).nanoid
   const idName = nanoID()
   const folderPath = path.resolve(UPLOAD_VIDEO_DIR, idName)
