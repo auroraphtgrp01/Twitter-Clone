@@ -11,6 +11,7 @@ import Followers from '~/models/schemas/Follower.schemas'
 import { ErrorWithStatus } from '~/models/Errors'
 import axios from 'axios'
 import HTTP_STATUS from '~/constants/httpStatus'
+import { random } from 'lodash'
 
 class UsersService {
   private signAccessToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
@@ -26,7 +27,18 @@ class UsersService {
       }
     })
   }
-  private signRefreshToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
+  private signRefreshToken({ user_id, verify, exp }: { user_id: string; verify: UserVerifyStatus, exp?: number }) {
+    if (exp) {
+      return signToken({
+        payload: {
+          user_id,
+          verify,
+          token_type: TokenType.RefressToken,
+          exp
+        },
+        privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string,
+      })
+    }
     return signToken({
       payload: {
         user_id,
@@ -140,7 +152,8 @@ class UsersService {
         _id: user_id,
         date_of_birth: new Date(payload.date_of_birth),
         password: hashPassword(payload.password),
-        email_verify_token
+        email_verify_token,
+        username: payload.email.split('@')[0] + random(1000, 9999)
       })
     )
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
@@ -163,15 +176,17 @@ class UsersService {
   async refreshToken({
     user_id,
     verify,
-    refresh_token
+    refresh_token,
+    exp
   }: {
     user_id: string
     verify: UserVerifyStatus
     refresh_token: string
+    exp: number
   }) {
     const [new_access_token, new_refresh_token] = await Promise.all([
       this.signAccessToken({ user_id, verify }),
-      this.signRefreshToken({ user_id, verify }),
+      this.signRefreshToken({ user_id, verify, exp }),
       databaseService.refreshTokens.deleteOne({ token: refresh_token })
     ])
     databaseService.refreshTokens.insertOne(

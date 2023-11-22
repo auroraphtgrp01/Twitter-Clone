@@ -36,6 +36,11 @@ class DatabaseService {
   get videoStatus(): Collection<VideoStatus> {
     return this.db.collection(process.env.DB_VIDEO_STATUS_COLLECTION as string)
   }
+  indexeUser() {
+    this.users.createIndex({ email: 1, password: 1 })
+    this.users.createIndex({ email: 1 }, { unique: true })
+    this.users.createIndex({ username: 1 }, { unique: true })
+  }
 }
 
 const databaseService = new DatabaseService()

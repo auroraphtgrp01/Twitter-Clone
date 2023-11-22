@@ -14,7 +14,9 @@ const port = process.env.PORT || 4000
 
 initFolder()
 app.use(cors())
-databaseService.connect()
+databaseService.connect().then(() => {
+  databaseService.indexeUser()
+})
 app.use(express.json())
 app.use('/user', userRoutes)
 app.use('/medias', mediasRoutes)
