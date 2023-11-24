@@ -1,7 +1,7 @@
 import User from '~/models/schemas/User.schemas'
 import databaseService from './database.services'
 import { hashPassword } from '~/utils/crypto'
-import { signToken } from '~/utils/jwt'
+import { signToken, verifyToken } from '~/utils/jwt'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import { ObjectId, ReturnDocument } from 'mongodb'
@@ -36,7 +36,7 @@ class UsersService {
           token_type: TokenType.RefressToken,
           exp
         },
-        privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string,
+        privateKey: process.env.JWT_REFRESH_TOKEN_SECRET as string
       })
     }
     return signToken({
@@ -49,6 +49,12 @@ class UsersService {
       options: {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRE_IN
       }
+    })
+  }
+  private decodeRefreshToken(token: string) {
+    return verifyToken({
+      token: token,
+      secretOnPublicKey: process.env.JWT_REFRESH_TOKEN_SECRET as string
     })
   }
   private signEmailVerifyToken({
@@ -160,10 +166,13 @@ class UsersService {
       user_id: (user_id as ObjectId).toString(),
       verify: UserVerifyStatus.Unverified
     })
+    const { iat, exp } = await this.decodeRefreshToken(refresh_token)
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
         user_id: new ObjectId(user_id),
-        token: refresh_token
+        token: refresh_token,
+        iat,
+        exp
       })
     )
     console.log('email' + email_verify_token)
@@ -189,10 +198,14 @@ class UsersService {
       this.signRefreshToken({ user_id, verify, exp }),
       databaseService.refreshTokens.deleteOne({ token: refresh_token })
     ])
+    const decode_refresh_token = await this.decodeRefreshToken(refresh_token)
+
     databaseService.refreshTokens.insertOne(
       new RefreshToken({
         user_id: new ObjectId(user_id),
-        token: new_refresh_token
+        token: new_refresh_token,
+        iat: decode_refresh_token.iat,
+        exp: decode_refresh_token.exp
       })
     )
     return {
@@ -202,10 +215,13 @@ class UsersService {
   }
   async login({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify })
+    const { iat, exp } = await this.decodeRefreshToken(refresh_token)
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
         user_id: new ObjectId(user_id),
-        token: refresh_token
+        token: refresh_token,
+        iat,
+        exp
       })
     )
     return {
@@ -232,10 +248,13 @@ class UsersService {
         user_id: user._id.toString(),
         verify: user.verify
       })
+      const { iat, exp } = await this.decodeRefreshToken(refresh_token)
       await databaseService.refreshTokens.insertOne(
         new RefreshToken({
           user_id: user._id,
-          token: refresh_token
+          token: refresh_token,
+          iat,
+          exp
         })
       )
       return {
@@ -287,10 +306,13 @@ class UsersService {
       )
     ])
     const [access_token, refresh_token] = token
+    const { iat, exp } = await this.decodeRefreshToken(refresh_token)
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
         user_id: new ObjectId(user_id),
-        token: refresh_token
+        token: refresh_token,
+        iat,
+        exp
       })
     )
     return {
@@ -448,7 +470,6 @@ class UsersService {
       message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESS
     }
   }
-
 }
 
 const usersService = new UsersService()

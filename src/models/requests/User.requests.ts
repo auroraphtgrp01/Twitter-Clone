@@ -37,6 +37,7 @@ export interface TokenPayload extends JwtPayload {
   verify: UserVerifyStatus
   token_type: TokenType
   exp: number
+  iat: number
 }
 
 export interface UpdateMeRequestBody {
