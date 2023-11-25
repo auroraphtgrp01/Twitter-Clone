@@ -6,6 +6,8 @@ import Followers from '~/models/schemas/Follower.schemas'
 import { VideoStatus } from '~/models/schemas/VideoStatus.schemas'
 import Tweet from '~/models/schemas/Tweet.schemas'
 import Hashtag from '~/models/schemas/Hashtag.schemas'
+import Bookmark from '~/models/schemas/Bookmark.schemas'
+import Like from '~/models/schemas/Like.schemas'
 
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitterdb.1rqwsij.mongodb.net/?retryWrites=true&w=majority`
@@ -43,6 +45,12 @@ class DatabaseService {
   }
   get hashtag(): Collection<Hashtag> {
     return this.db.collection(process.env.DB_HASHTAG_COLLECTION as string)
+  }
+  get bookmark(): Collection<Bookmark> {
+    return this.db.collection(process.env.DB_BOOKMARK_COLLECTION as string)
+  }
+  get like(): Collection<Like> {
+    return this.db.collection(process.env.DB_LIKE_COLLECTION as string)
   }
   async indexeUser() {
     const exists = await this.users.indexExists(['email_1', 'email_1_password_1', 'username_1'])
