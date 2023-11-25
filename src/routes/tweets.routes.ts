@@ -17,6 +17,7 @@ tweetRouter.post(
   accessTokenValidator,
   verifiedUserValidator,
   createTweetValidator,
+  audienceValidator,
   wrapRequestHandler(createTweetController)
 )
 

@@ -32,7 +32,7 @@ export const createTweetValidator = validate(
     },
     parent_id: {
       custom: {
-        options: (value, { req }) => {
+        options: async (value, { req }) => {
           const type = req.body.type as TweetType
           // Nếu type là retweet, comment, quotetweet thì parent_id phải là tweet_id của tweet cha
           if ([TweetType.ReTweet, TweetType.Comment, TweetType.QuoteTweet].includes(type) && !ObjectId.isValid(value)) {
@@ -41,7 +41,14 @@ export const createTweetValidator = validate(
           if (type === TweetType.Tweet && value !== null) {
             throw new Error(TWEET_MESSAGES.PARENT_ID_MUST_BE_NULL)
           }
-          return true
+          const parent = await databaseService.tweet.findOne({
+            _id: new ObjectId(value)
+          })
+          if (!parent) {
+            console.log('parent', value)
+            return true
+          }
+          return (req.tweet = parent as Tweet)
         }
       }
     },
@@ -249,25 +256,27 @@ export const tweetIDValidator = validate(
   )
 )
 
-export const audienceValidator = wrapRequestHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const tweet = req.tweet as Tweet
-  if (tweet.audience === TweetAudience.TweetCircle) {
-    // if (!req.decoded_authorization) {
-    //   throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED })
-    // }
-    const author = await databaseService.users.findOne({
-      _id: new ObjectId(tweet.user_id)
-    })
-    if (!author || author.verify === UserVerifyStatus.Banned) {
-      throw new ErrorWithStatus({ status: HTTP_STATUS.NOT_FOUND, message: USER_MESSAGES.USER_NOT_FOUND })
-    }
-    if (req.decoded_authorization) {
-      const { user_id } = req.decoded_authorization as TokenPayload
-      const isInTwitterCircle = author.twitter_circle.some((user_circle_id) => user_circle_id.equals(user_id))
-      if (!author._id.equals(user_id) && !isInTwitterCircle) {
-        throw new ErrorWithStatus({ status: HTTP_STATUS.FORBIDDEN, message: TWEET_MESSAGES.TWEET_IS_NOT_PUBLIC })
+const audience = (tweet: Tweet) => {
+  return wrapRequestHandler(async (req: Request, res: Response, next: NextFunction) => {
+    if (tweet.audience === TweetAudience.TweetCircle) {
+      const author = await databaseService.users.findOne({
+        _id: new ObjectId(tweet.user_id)
+      })
+      if (!author || author.verify === UserVerifyStatus.Banned) {
+        throw new ErrorWithStatus({ status: HTTP_STATUS.NOT_FOUND, message: USER_MESSAGES.USER_NOT_FOUND })
       }
+      if (req.decoded_authorization) {
+        const { user_id } = req.decoded_authorization as TokenPayload
+        const isInTwitterCircle = author.twitter_circle.some((user_circle_id) => user_circle_id.equals(user_id))
+        if (!author._id.equals(user_id) && !isInTwitterCircle) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.FORBIDDEN, message: TWEET_MESSAGES.TWEET_IS_NOT_PUBLIC })
+        }
+      }
+      return next()
     }
-    return next()
-  }
-})
+  })
+}
+
+export const audienceValidator = async (req: Request, res: Response, next: NextFunction) => {
+  audience(req.tweet as Tweet)(req, res, next)
+}
