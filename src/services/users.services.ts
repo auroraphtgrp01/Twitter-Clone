@@ -27,7 +27,7 @@ class UsersService {
       }
     })
   }
-  private signRefreshToken({ user_id, verify, exp }: { user_id: string; verify: UserVerifyStatus, exp?: number }) {
+  private signRefreshToken({ user_id, verify, exp }: { user_id: string; verify: UserVerifyStatus; exp?: number }) {
     if (exp) {
       return signToken({
         payload: {

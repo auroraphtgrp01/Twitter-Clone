@@ -23,7 +23,6 @@ export const checkVideoHasAudio = async (filePath: string) => {
 }
 
 const getBitrate = async (filePath: string) => {
-
   const { $ } = await import('zx')
   const slash = (await import('slash')).default
   const { stdout } = await $`ffprobe ${[
@@ -355,7 +354,7 @@ export const encodeHLSWithMultipleVideoStreams = async (inputPath: string) => {
   await encodeFunc({
     bitrate: {
       720: bitrate720,
-      1080: bitrate1080,
+      1080: bitrate1080
       // 1440: bitrate1440,
       // original: bitrate
     },

@@ -39,8 +39,9 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginR
 export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query
   const result = await usersService.oauth(code as string)
-  const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK as string}?access_token=${result.access_token
-    }&refresh_token=${result.refresh_token}&new_user=${result.newUser}&verify=${result.verify}`
+  const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK as string}?access_token=${
+    result.access_token
+  }&refresh_token=${result.refresh_token}&new_user=${result.newUser}&verify=${result.verify}`
   return res.redirect(urlRedirect)
 }
 
@@ -175,11 +176,10 @@ export const followController = async (
   const { user_id } = req.decoded_authorization as TokenPayload
   const { followed_user_id } = req.body
   if (user_id === followed_user_id) {
-    throw new ErrorWithStatus(
-      {
-        message: USER_MESSAGES.CANNOT_FOLLOW_YOURSELF,
-        status: 404
-      })
+    throw new ErrorWithStatus({
+      message: USER_MESSAGES.CANNOT_FOLLOW_YOURSELF,
+      status: 404
+    })
   }
   const result = await usersService.follow(user_id, followed_user_id)
   return res.json({

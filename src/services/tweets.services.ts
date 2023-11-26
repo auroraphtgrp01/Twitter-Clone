@@ -3,6 +3,8 @@ import databaseService from './database.services'
 import Tweet from '~/models/schemas/Tweet.schemas'
 import { ObjectId, WithId } from 'mongodb'
 import Hashtag from '~/models/schemas/Hashtag.schemas'
+import { TweetType } from '~/constants/enums'
+import { TokenPayload } from '~/models/requests/User.requests'
 
 class TweetService {
   async checkAndCreateHashtags(hashtags: string[]) {
@@ -48,14 +50,181 @@ class TweetService {
         returnDocument: 'after',
         projection: {
           user_views: 1,
-          guest_views: 1
+          guest_views: 1,
+          updated_at: 1
         }
       }
     )
     return result as WithId<{
       user_views?: number
       guest_views?: number
+      updated_at: Date
     }>
+  }
+  async getTweetChildren({
+    tweet_id,
+    tweet_type,
+    limit,
+    page,
+    user_id
+  }: {
+    tweet_id: string
+    tweet_type: TweetType
+    limit: number
+    page: number
+    user_id?: string
+  }) {
+    const tweet = await databaseService.tweet
+      .aggregate<Tweet>([
+        {
+          $match: {
+            parent_id: new ObjectId(tweet_id),
+            type: TweetType.Comment
+          }
+        },
+        {
+          $lookup: {
+            from: 'hashtags',
+            localField: 'hashtags',
+            foreignField: '_id',
+            as: 'hashtags'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'mentions',
+            foreignField: '_id',
+            as: 'mentions'
+          }
+        },
+        {
+          $addFields: {
+            mentions: {
+              $map: {
+                input: '$mentions',
+                as: 'mention',
+                in: {
+                  _id: '$$mention._id',
+                  name: '$$mention.name',
+                  username: '$$mention.username',
+                  email: '$$mention.email'
+                }
+              }
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'bookmarks',
+            localField: '_id',
+            foreignField: 'tweet_id',
+            as: 'bookmarks'
+          }
+        },
+        {
+          $lookup: {
+            from: 'likes',
+            localField: '_id',
+            foreignField: 'tweet_id',
+            as: 'likes'
+          }
+        },
+        {
+          $lookup: {
+            from: 'tweets',
+            localField: '_id',
+            foreignField: 'parent_id',
+            as: 'tweet_child'
+          }
+        },
+        {
+          $addFields: {
+            bookmarks: {
+              $size: '$bookmarks'
+            },
+            likes: {
+              $size: '$likes'
+            },
+            retweet_count: {
+              $size: {
+                $filter: {
+                  input: '$tweet_child',
+                  as: 'item',
+                  cond: {
+                    $eq: ['$$item.type', TweetType.ReTweet]
+                  }
+                }
+              }
+            },
+            comment_count: {
+              $size: {
+                $filter: {
+                  input: '$tweet_child',
+                  as: 'item',
+                  cond: {
+                    $eq: ['$$item.type', TweetType.Comment]
+                  }
+                }
+              }
+            },
+            quote_count: {
+              $size: {
+                $filter: {
+                  input: '$tweet_child',
+                  as: 'item',
+                  cond: {
+                    $eq: ['$$item.type', TweetType.QuoteTweet]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          $skip: limit * (page - 1)
+        },
+        {
+          $limit: limit
+        }
+      ])
+      .toArray()
+
+    const tweetIds = tweet.map((item) => item._id as ObjectId)
+    const inc = user_id ? { user_views: 1 } : { guest_views: 1 }
+    const date = new Date()
+    const [count] = await Promise.all([
+      databaseService.tweet.countDocuments({
+        parent_id: new ObjectId(tweet_id),
+        type: tweet_type
+      }),
+      databaseService.tweet.updateMany(
+        {
+          _id: {
+            $in: tweetIds
+          }
+        },
+        {
+          $inc: inc,
+          $set: {
+            updated_at: date
+          }
+        }
+      )
+    ])
+    const total = Math.ceil(count / limit)
+    tweet.forEach((item) => {
+      item.updated_at = date
+      if (user_id) {
+        ;(item.user_views as number) += 1
+      } else {
+        ;(item.guest_views as number) += 1
+      }
+    })
+    return {
+      total,
+      tweet
+    }
   }
 }
 

@@ -75,7 +75,7 @@ export const USER_MESSAGES = {
   GMAIL_NOT_VERIFIED: 'Gmail not verified',
   UPLOAD_SUCCESS: 'Upload success',
   REFRESH_TOKEN_SUCCESS: 'Refresh token success',
-  GET_VIDEO_STATUS_SUCCESS: 'Get video status success',
+  GET_VIDEO_STATUS_SUCCESS: 'Get video status success'
 } as const
 
 export const TWEET_MESSAGES = {
@@ -96,13 +96,15 @@ export const TWEET_MESSAGES = {
   TWEET_NOT_FOUND: 'Tweet not found',
   TWEET_IS_NOT_PUBLIC: 'Tweet is not public',
   GET_TWEET_SUCCESSFULLY: 'Get tweet successfully',
+  LIMIT_MUST_BE_LESS_THAN_100_AND_GREATER_THAN_0: 'Limit must be less than 100 and greater than 0',
+  PAGE_MUST_BE_GREATER_THAN_0: 'Page must be greater than 0'
 } as const
 
 export const BOOKMARK_MESSAGES = {
   BOOKMARK_TWEET_SUCCESSFULLY: 'Bookmark tweet successfully',
-  UN_BOOKMARK_TWEET_SUCCESSFULLY: 'Un bookmark tweet successfully',
+  UN_BOOKMARK_TWEET_SUCCESSFULLY: 'Un bookmark tweet successfully'
 } as const
 export const LIKE_MESSAGES = {
   LIKE_SUCCESS: 'Like success',
-  UNLIKE_SUCCESS: 'Unlike success',
+  UNLIKE_SUCCESS: 'Unlike success'
 } as const
