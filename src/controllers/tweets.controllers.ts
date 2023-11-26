@@ -50,3 +50,14 @@ export const getTweetChildrenController = async (req: Request<TweetParam, any, T
     total: total
   })
 }
+
+export const getNewFeedsController = async (req: Request<ParamsDictionary, any, TweetQuery>, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const limit = Number(req.query.limit)
+  const page = Number(req.query.page)
+  const result = await tweetServices.getNewFeeds({ user_id: user_id, limit, page })
+  res.json({
+    message: TWEET_MESSAGES.GET_TWEET_SUCCESSFULLY,
+    result
+  })
+}

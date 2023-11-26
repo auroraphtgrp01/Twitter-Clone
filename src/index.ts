@@ -5,6 +5,7 @@ import { initFolder } from './utils/file'
 import { config } from 'dotenv'
 import cors from 'cors'
 import { RouterApp } from './routes/index.routes'
+// import 'src/utils/faker'
 config()
 const app = express()
 const port = process.env.PORT || 4000

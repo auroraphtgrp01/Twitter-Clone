@@ -216,15 +216,28 @@ class TweetService {
     tweet.forEach((item) => {
       item.updated_at = date
       if (user_id) {
-        ;(item.user_views as number) += 1
+        ; (item.user_views as number) += 1
       } else {
-        ;(item.guest_views as number) += 1
+        ; (item.guest_views as number) += 1
       }
     })
     return {
       total,
       tweet
     }
+  }
+  async getNewFeeds({ user_id, limit, page }: { user_id: string; limit: number; page: number }) {
+    const followed_user_ids = await databaseService.followers.find({
+      user_id: new ObjectId(user_id)
+    }, {
+      projection: {
+        followed_user_id: 1,
+        _id: 0
+      }
+    }).toArray()
+    const ids = followed_user_ids.map((item) => item.followed_user_id)
+    ids.push(new ObjectId(user_id))
+    return ids
   }
 }
 
