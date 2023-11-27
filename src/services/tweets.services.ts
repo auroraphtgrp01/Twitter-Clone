@@ -227,17 +227,266 @@ class TweetService {
     }
   }
   async getNewFeeds({ user_id, limit, page }: { user_id: string; limit: number; page: number }) {
-    const followed_user_ids = await databaseService.followers.find({
-      user_id: new ObjectId(user_id)
-    }, {
-      projection: {
-        followed_user_id: 1,
-        _id: 0
-      }
-    }).toArray()
+    const followed_user_ids = await databaseService.followers
+      .find(
+        {
+          user_id: new ObjectId(user_id)
+        },
+        {
+          projection: {
+            followed_user_id: 1,
+            _id: 0
+          }
+        }
+      )
+      .toArray()
     const ids = followed_user_ids.map((item) => item.followed_user_id)
     ids.push(new ObjectId(user_id))
-    return ids
+    const [tweets, total] = await Promise.all([
+      databaseService.tweet
+        .aggregate([
+          {
+            $match: {
+              user_id: {
+                $in: ids
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: 'hashtags',
+              localField: 'hashtags',
+              foreignField: '_id',
+              as: 'hashtags'
+            }
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'user_id',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          {
+            $unwind: {
+              path: '$user'
+            }
+          },
+          {
+            $match: {
+              $or: [
+                {
+                  audience: 0
+                },
+                {
+                  $and: [
+                    {
+                      audience: 1
+                    },
+                    {
+                      'user.twitter_circle': {
+                        $in: [new ObjectId(user_id)]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            $skip: limit * (page - 1)
+          },
+          {
+            $limit: limit
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'mentions',
+              foreignField: '_id',
+              as: 'mentions'
+            }
+          },
+          {
+            $addFields: {
+              mentions: {
+                $map: {
+                  input: '$mentions',
+                  as: 'mention',
+                  in: {
+                    _id: '$$mention._id',
+                    name: '$$mention.name',
+                    username: '$$mention.username',
+                    email: '$$mention.email'
+                  }
+                }
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: 'bookmarks',
+              localField: '_id',
+              foreignField: 'tweet_id',
+              as: 'bookmarks'
+            }
+          },
+          {
+            $lookup: {
+              from: 'likes',
+              localField: '_id',
+              foreignField: 'tweet_id',
+              as: 'likes'
+            }
+          },
+          {
+            $lookup: {
+              from: 'tweets',
+              localField: '_id',
+              foreignField: 'parent_id',
+              as: 'tweet_child'
+            }
+          },
+          {
+            $addFields: {
+              bookmarks: {
+                $size: '$bookmarks'
+              },
+              likes: {
+                $size: '$likes'
+              },
+              retweet_count: {
+                $size: {
+                  $filter: {
+                    input: '$tweet_child',
+                    as: 'item',
+                    cond: {
+                      $eq: ['$$item.type', TweetType.ReTweet]
+                    }
+                  }
+                }
+              },
+              comment_count: {
+                $size: {
+                  $filter: {
+                    input: '$tweet_child',
+                    as: 'item',
+                    cond: {
+                      $eq: ['$$item.type', TweetType.Comment]
+                    }
+                  }
+                }
+              },
+              quote_count: {
+                $size: {
+                  $filter: {
+                    input: '$tweet_child',
+                    as: 'item',
+                    cond: {
+                      $eq: ['$$item.type', TweetType.QuoteTweet]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              tweet_child: 0,
+              user: {
+                password: 0,
+                email_verify_token: 0,
+                forgot_password_token: 0,
+                twitter_circle: 0,
+                date_of_birth: 0
+              }
+            }
+          }
+        ])
+        .toArray(),
+      databaseService.tweet
+        .aggregate([
+          {
+            $match: {
+              user_id: {
+                $in: ids
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: 'hashtags',
+              localField: 'hashtags',
+              foreignField: '_id',
+              as: 'hashtags'
+            }
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'user_id',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          {
+            $unwind: {
+              path: '$user'
+            }
+          },
+          {
+            $match: {
+              $or: [
+                {
+                  audience: 0
+                },
+                {
+                  $and: [
+                    {
+                      audience: 1
+                    },
+                    {
+                      'user.twitter_circle': {
+                        $in: [new ObjectId(user_id)]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            $count: 'total'
+          }
+        ])
+        .toArray()
+    ])
+
+    const tweetIds = tweets.map((item) => item._id as ObjectId)
+    const date = new Date()
+    databaseService.tweet.updateMany(
+      {
+        _id: {
+          $in: tweetIds
+        }
+      },
+      {
+        $inc: { user_views: 1 },
+        $set: {
+          updated_at: date
+        }
+      }
+    )
+
+    tweets.forEach((item) => {
+      item.updated_at = date
+      item.user_views += 1
+    })
+    return {
+      tweets,
+      total: total[0].total
+    }
   }
 }
 
