@@ -12,6 +12,7 @@ import { ErrorWithStatus } from '~/models/Errors'
 import axios from 'axios'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { random } from 'lodash'
+import { sendResetPassword, sendVerifyEmail } from '~/utils/email'
 
 class UsersService {
   private signAccessToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
@@ -175,8 +176,8 @@ class UsersService {
         exp
       })
     )
-    console.log('email' + email_verify_token)
-
+    console.log('email' + `${process.env.CLIENT_URL}/verify-email?token=${email_verify_token}`)
+    await sendVerifyEmail(payload.email, email_verify_token)
     return {
       access_token,
       refresh_token
@@ -320,9 +321,10 @@ class UsersService {
       refresh_token
     }
   }
-  async resendVerifyEmail(user_id: string) {
+  async resendVerifyEmail(user_id: string, email: string) {
     const email_verify_token = await this.signEmailVerifyToken({ user_id, verify: UserVerifyStatus.Unverified })
-    console.log('email token: ' + email_verify_token)
+    await sendVerifyEmail(email, email_verify_token)
+    console.log(email)
     await databaseService.users.updateOne(
       {
         _id: new ObjectId(user_id)
@@ -336,7 +338,7 @@ class UsersService {
     )
     return 1
   }
-  async forgotPassword({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
+  async forgotPassword({ user_id, verify, email }: { user_id: string; verify: UserVerifyStatus; email: string }) {
     const token = await this.signForgotPasswordToken({ user_id, verify })
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
@@ -348,6 +350,7 @@ class UsersService {
       }
     )
     // send email
+    await sendResetPassword(email, token)
     console.log('forgot password token: ' + token)
     return {
       message: USER_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD,

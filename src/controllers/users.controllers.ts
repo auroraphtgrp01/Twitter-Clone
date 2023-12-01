@@ -39,9 +39,8 @@ export const loginController = async (req: Request<ParamsDictionary, any, LoginR
 export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query
   const result = await usersService.oauth(code as string)
-  const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK as string}?access_token=${
-    result.access_token
-  }&refresh_token=${result.refresh_token}&new_user=${result.newUser}&verify=${result.verify}`
+  const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK as string}?access_token=${result.access_token
+    }&refresh_token=${result.refresh_token}&new_user=${result.newUser}&verify=${result.verify}`
   return res.redirect(urlRedirect)
 }
 
@@ -112,7 +111,7 @@ export const resendVerifyEmailController = async (req: Request, res: Response, n
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
   }
-  await usersService.resendVerifyEmail(user_id)
+  await usersService.resendVerifyEmail(user_id, user.email)
   return res.json({
     message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS
   })
@@ -126,7 +125,8 @@ export const forgotPasswordController = async (
   const { _id } = req.user as User
   const result = await usersService.forgotPassword({
     user_id: (_id as ObjectId).toString(),
-    verify: (req.user as User).verify as UserVerifyStatus
+    verify: (req.user as User).verify as UserVerifyStatus,
+    email: (req.user as User).email
   })
   return res.json(result)
 }
