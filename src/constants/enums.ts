@@ -1,3 +1,5 @@
+import e from 'express'
+
 export enum UserVerifyStatus {
   Unverified,
   Verified,
@@ -14,6 +16,11 @@ export enum MediaType {
   Image,
   Video,
   HLS
+}
+
+export enum MediaQueryType {
+  Image = 'image',
+  Video = 'video'
 }
 
 export enum EncodingStatus {
@@ -33,4 +40,9 @@ export enum TweetType {
 export enum TweetAudience {
   Everyone,
   TweetCircle
+}
+
+export enum PeopleFollow {
+  Anyone = '0',
+  Following = '1'
 }

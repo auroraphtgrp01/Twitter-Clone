@@ -17,6 +17,7 @@ databaseService.connect().then(() => {
   databaseService.indexRefreshToken()
   databaseService.indexVideoStatus()
   databaseService.indexFollowers()
+  databaseService.indexTweet()
 })
 app.use(express.json())
 RouterApp(app)

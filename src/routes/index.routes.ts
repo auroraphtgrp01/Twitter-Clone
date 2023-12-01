@@ -6,6 +6,7 @@ import mediasRoutes from './medias.routes'
 import tweetRouter from './tweets.routes'
 import staticRoutes from './static.routes'
 import { UPLOAD_VIDEO_DIR } from '~/constants/dir'
+import searchRouter from './search.routes'
 
 export const RouterApp = async (useRoute: express.Application) => {
   useRoute.use('/user', usersRoutes)
@@ -15,4 +16,5 @@ export const RouterApp = async (useRoute: express.Application) => {
   useRoute.use('/bookmarks', bookmarkRouter)
   useRoute.use('/static', staticRoutes)
   useRoute.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
+  useRoute.use('/search', searchRouter)
 }

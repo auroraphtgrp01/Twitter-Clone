@@ -216,9 +216,9 @@ class TweetService {
     tweet.forEach((item) => {
       item.updated_at = date
       if (user_id) {
-        ; (item.user_views as number) += 1
+        ;(item.user_views as number) += 1
       } else {
-        ; (item.guest_views as number) += 1
+        ;(item.guest_views as number) += 1
       }
     })
     return {
@@ -485,7 +485,7 @@ class TweetService {
     })
     return {
       tweets,
-      total: total[0].total
+      total: total[0]?.total
     }
   }
 }
