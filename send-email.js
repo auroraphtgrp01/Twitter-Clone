@@ -1,12 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const {
-  SendEmailCommand,
-  SESClient
-} = require('@aws-sdk/client-ses')
-const {
-  config
-} = require('dotenv')
+const { SendEmailCommand, SESClient } = require('@aws-sdk/client-ses')
+const { config } = require('dotenv')
 
 config()
 // Create SES service object.

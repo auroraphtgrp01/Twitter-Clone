@@ -59,7 +59,7 @@ class Queue {
         await fsPromise.unlink(videoPath)
         const name = nameID.split(/\\/)[nameID.split(/\\/).length - 1]
         const files = getFiles(path.resolve(UPLOAD_VIDEO_DIR, nameID))
-        await Promise.all(
+        const S3Result = await Promise.all(
           files.map((filepath) => {
             const fileName = 'video-hls' + filepath.replace(path.resolve(UPLOAD_VIDEO_DIR), '').replace(/\\/g, '/')
             return uploadFileToS3({
@@ -69,9 +69,11 @@ class Queue {
             })
           })
         )
+        const dir = path.resolve(UPLOAD_VIDEO_DIR, name)
+        fs.rmdirSync(dir, { recursive: true })
         await databaseService.videoStatus.updateOne(
           {
-            name: nameID
+            name: name
           },
           {
             $set: {

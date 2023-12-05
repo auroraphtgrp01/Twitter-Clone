@@ -3,9 +3,11 @@ import { config } from 'dotenv'
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'
 import path from 'path'
+import { Request, Response } from 'express'
 config()
 const s3 = new S3({
-  region: process.env.AWS_REGION as string, credentials: {
+  region: process.env.AWS_REGION as string,
+  credentials: {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID as string
   }
@@ -22,7 +24,7 @@ export const uploadFileToS3 = ({
   const parallelUploads3 = new Upload({
     client: s3,
     params: {
-      Bucket: 'twitter-clone-4869',
+      Bucket: process.env.S3_BUCKET_NAME as string,
       Key: fileName,
       Body: fs.readFileSync(path.resolve(filePath)),
       ContentType: contentType
@@ -37,7 +39,6 @@ export const uploadFileToS3 = ({
   return parallelUploads3.done()
 }
 
-
 // parallelUploads3.on("httpUploadProgress", (progress) => {
 //   console.log(progress);
 // });
@@ -45,3 +46,15 @@ export const uploadFileToS3 = ({
 // parallelUploads3.done().then(res => {
 //   console.log(res)
 // })
+
+export const sendFileFromS3 = async (res: Response, filePath: string) => {
+  try {
+    const data = await s3.getObject({
+      Bucket: process.env.S3_BUCKET_NAME as string,
+      Key: filePath
+    })
+    ;(data.Body as any).pipe(res)
+  } catch (error) {
+    res.status(404).send(error)
+  }
+}
