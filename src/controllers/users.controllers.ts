@@ -224,3 +224,9 @@ export const refreshTokenController = async (
     result
   })
 }
+
+export const getUser = async (req: Request, res: Response, next: NextFunction) => {
+  const { username } = req.params
+  const result = await usersService.getUser(username)
+  return res.json(result)
+}

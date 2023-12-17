@@ -15,7 +15,8 @@ import {
   unfollowController,
   changePasswordController,
   oauthController,
-  refreshTokenController
+  refreshTokenController,
+  getUser
 } from '~/controllers/users.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
@@ -204,4 +205,5 @@ usersRoutes.put(
 
 usersRoutes.get('/delete-db', deleteDBController)
 
+usersRoutes.get('/:username', wrapRequestHandler(getUser))
 export default usersRoutes

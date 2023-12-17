@@ -9,6 +9,8 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 // import 'src/utils/faker'
 import './utils/s3'
+import Conversation from './models/schemas/Conversation.schemas'
+import { ObjectId } from 'mongodb'
 config()
 const app = express()
 const port = process.env.PORT || 4000
@@ -53,10 +55,17 @@ io.on('connection', (socket) => {
     console.log(`${socket.id} disconnected`)
   })
   socket.on('private_message', (data) => {
-    const receive_socket_id = users[data.to].socket_id
+    const receive_socket_id = users[data.to]?.socket_id
+    databaseService.conversation.insertOne(
+      new Conversation({
+        sender_id: new ObjectId(data.from),
+        receiver_id: new ObjectId(data.to),
+        content: data.content
+      })
+    )
     socket.to(receive_socket_id).emit('private_message_rec', {
       content: data.content,
-      from: user_id 
+      from: user_id
     })
   })
 })
