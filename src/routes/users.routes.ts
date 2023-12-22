@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { NextFunction, Router, Request, Response } from 'express'
 import {
   verifyEmailController,
   loginController,
@@ -44,7 +44,15 @@ const usersRoutes = Router()
  * Method: POST
  * Body: {  email: string,  password: string}
  */
-usersRoutes.post('/login', loginValidator, wrapRequestHandler(loginController))
+usersRoutes.post(
+  '/login',
+  (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body)
+    next()
+  },
+  loginValidator,
+  wrapRequestHandler(loginController)
+)
 /**
  * Description. Login a new user
  * Path: /login
