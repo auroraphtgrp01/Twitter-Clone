@@ -16,7 +16,7 @@ config()
 const app = express()
 // app.use(express.json())
 app.use(bodyParser.json())
-app.get('/', bodyParser.json(), (req, res) => {
+app.post('/', bodyParser.json(), (req, res) => {
   console.log(req.body)
   console.log('hello')
   res.json({ message: 'hello', ...req.body })
