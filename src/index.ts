@@ -15,8 +15,8 @@ import bodyParser from 'body-parser'
 config()
 const app = express()
 // app.use(express.json())
-app.use(bodyParser.json())
-app.post('/', bodyParser.json(), (req, res) => {
+bodyParser.json()
+app.post('/', (req, res) => {
   console.log(req.body)
   console.log('hello')
   res.json({ message: 'hello', ...req.body })
