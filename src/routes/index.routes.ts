@@ -11,16 +11,14 @@ import conversationRouter from './conversation.routes'
 import bodyParser from 'body-parser'
 
 export const RouterApp = async (useRoute: express.Application) => {
-  bodyParser.json()
-  bodyParser.urlencoded({ extended: true })
-  useRoute.use(bodyParser.json())
-  useRoute.use('/user', usersRoutes)
-  useRoute.use('/medias', mediasRoutes)
-  useRoute.use('/tweet', tweetRouter)
-  useRoute.use('/likes', likeRouter)
-  useRoute.use('/bookmarks', bookmarkRouter)
-  useRoute.use('/static', staticRoutes)
-  useRoute.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
-  useRoute.use('/search', searchRouter)
-  useRoute.use('/conversation', conversationRouter)
+  const bodyParserJson = bodyParser.json()
+  useRoute.use('/user', bodyParserJson, usersRoutes)
+  useRoute.use('/medias', bodyParserJson, mediasRoutes)
+  useRoute.use('/tweet', bodyParserJson, tweetRouter)
+  useRoute.use('/likes', bodyParserJson, likeRouter)
+  useRoute.use('/bookmarks', bodyParserJson, bookmarkRouter)
+  useRoute.use('/static', bodyParserJson, staticRoutes)
+  useRoute.use('/static/video', bodyParserJson, express.static(UPLOAD_VIDEO_DIR))
+  useRoute.use('/search', bodyParserJson, searchRouter)
+  useRoute.use('/conversation', bodyParserJson, conversationRouter)
 }
