@@ -11,13 +11,15 @@ import { rateLimit } from 'express-rate-limit'
 import './utils/s3'
 import initSocket from './utils/socket'
 import helmet from 'helmet'
+import bodyParser from 'body-parser'
 config()
 const app = express()
 app.use(express.json())
+app.use(bodyParser.json())
 app.get('/', (req, res) => {
   console.log(req.body)
   console.log('hello')
-  res.json({ message: 'hello' })
+  res.json({ message: 'hello', ...req.body })
 })
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
