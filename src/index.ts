@@ -13,6 +13,7 @@ import initSocket from './utils/socket'
 import helmet from 'helmet'
 config()
 const app = express()
+app.use(express.json())
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -24,7 +25,6 @@ const port = process.env.PORT || 4000
 const httpServer = createServer(app)
 
 initFolder()
-app.use(express.json())
 app.use(limiter)
 app.use(helmet())
 app.use(cors())
