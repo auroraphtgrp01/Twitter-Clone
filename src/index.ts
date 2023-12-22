@@ -14,7 +14,9 @@ import helmet from 'helmet'
 import bodyParser from 'body-parser'
 config()
 const app = express()
-// app.use(express.json())
+app.use(express.json())
+// app.use(express.urlencoded({ extended: true }))
+// app.use(bodyParser.json())
 app.post('/', (req, res) => {
   console.log(req.body)
   console.log('hello')
@@ -41,9 +43,7 @@ databaseService.connect().then(() => {
   databaseService.indexFollowers()
   databaseService.indexTweet()
 })
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(bodyParser.json())
+
 RouterApp(app)
 app.use(defaultErrorHandler)
 initSocket(httpServer)
