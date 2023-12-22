@@ -6,16 +6,27 @@ import { config } from 'dotenv'
 import cors from 'cors'
 import { RouterApp } from './routes/index.routes'
 import { createServer } from 'http'
-import { Server } from 'socket.io'
 // import 'src/utils/faker'
+import { rateLimit } from 'express-rate-limit'
 import './utils/s3'
 import initSocket from './utils/socket'
+import helmet from 'helmet'
 config()
 const app = express()
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  // store: ... , // Use an external store for consistency across multiple server instances.
+})
 const port = process.env.PORT || 4000
 const httpServer = createServer(app)
 
 initFolder()
+app.use(express.json())
+app.use(limiter)
+app.use(helmet())
 app.use(cors())
 databaseService.connect().then(() => {
   databaseService.indexeUser()
@@ -24,12 +35,11 @@ databaseService.connect().then(() => {
   databaseService.indexFollowers()
   databaseService.indexTweet()
 })
-app.use(express.json())
 RouterApp(app)
 app.use(defaultErrorHandler)
 initSocket(httpServer)
 // app.listen(port, () => {
-//   console.log(`Listening on port ${port}`)
+//   conole.log(`Listening on port ${port}`)
 // })
 httpServer.listen(port, () => {
   console.log(`Listening on port ${port}`)
