@@ -14,9 +14,9 @@ import helmet from 'helmet'
 import bodyParser from 'body-parser'
 config()
 const app = express()
-app.use(express.json())
+// app.use(express.json())
 app.use(bodyParser.json())
-app.get('/', (req, res) => {
+app.get('/', bodyParser.json(), (req, res) => {
   console.log(req.body)
   console.log('hello')
   res.json({ message: 'hello', ...req.body })
