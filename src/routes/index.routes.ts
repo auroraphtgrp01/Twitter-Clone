@@ -8,8 +8,12 @@ import staticRoutes from './static.routes'
 import { UPLOAD_VIDEO_DIR } from '~/constants/dir'
 import searchRouter from './search.routes'
 import conversationRouter from './conversation.routes'
+import bodyParser from 'body-parser'
 
 export const RouterApp = async (useRoute: express.Application) => {
+  bodyParser.json()
+  bodyParser.urlencoded({ extended: true })
+  useRoute.use(bodyParser.json())
   useRoute.use('/user', usersRoutes)
   useRoute.use('/medias', mediasRoutes)
   useRoute.use('/tweet', tweetRouter)
