@@ -1,5 +1,3 @@
-[![Express Logo](https://caodang.fpt.edu.vn/wp-content/uploads/a-9.png)](http://expressjs.com/)
-
 [Express'](https://www.npmjs.com/package/express) application generator.
 
 [![NPM Version][npm-image]][npm-url]
