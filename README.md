@@ -1,4 +1,4 @@
-[![Express Logo](https://inapp.com/wp-content/uploads/elementor/thumbs/express-js-01-1-q05uw85vt1jqloiy5k82sfy7tgvysgt1uqld8slsbc.png)](http://expressjs.com/)
+[![Express Logo](https://caodang.fpt.edu.vn/wp-content/uploads/a-9.png)](http://expressjs.com/)
 
 [Express'](https://www.npmjs.com/package/express) application generator.
 
